@@ -19,4 +19,8 @@ P0 | As a user | I want to create pokemon teams that are stored online. A databa
 P0 | As a user | I want to create a username with my email and password. My trainerID will be automatically created, stored in **MySQL Database and Redis Store**, and the ID be used for teams. <br> **Endpoint**: /users |
 P1 | As a user | Even though we can store the teams, a big part is selecting the movesets for each pokemon. This will take a lot of coding database rules and restrictions, which is why it’s labelled as P1. <br> **Endpoint**: /teams/moves - picks moves for pokemon |
 P1 | As a user | Stats are the next thing to tackle and that is its own page under pokemon selection. <br> **Endpoint**: /teams/stats |
-![image](https://user-images.githubusercontent.com/49173893/119774721-976cf380-be90-11eb-91f2-23eca04ae9bd.png)
+
+
+
+
+[image](https://user-images.githubusercontent.com/49173893/119774721-976cf380-be90-11eb-91f2-23eca04ae9bd.png)
