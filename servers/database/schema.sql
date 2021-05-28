@@ -1,5 +1,5 @@
 /*outer*/
-create table if not exists Trainer (
+create table if not exists User (
     TrainerID int not null auto_increment primary key,
     Email varchar(128) not null unique,
     PassHash binary(64) not null,
