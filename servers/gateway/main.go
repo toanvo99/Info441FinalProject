@@ -6,6 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"Info441FinalProject/servers/gateway/sessions"
+
+	"github.com/go-redis/redis"
 )
 
 func main() {
@@ -22,11 +27,21 @@ func main() {
 	if len(SESSIONKEY) == 0 {
 		log.Fatal("No SESSIONKEY found")
 	}
+	REDISADDR := os.Getenv("REDISADDR")
+	if len(REDISADDR) == 0 {
+		log.Fatal("No REDISADDR found")
+	}
 
 	sqlPass := os.Getenv("MYSQL_ROOT_PASSWORD")
 	if len(sqlPass) == 0 {
 		log.Fatal("No MYSQL_ROOT_PASSWORD found")
 	}
+
+	// This will be our redisStore, just keeping it unused as not sure
+	// what our handler context will look like yet.
+	_ = sessions.NewRedisStore(redis.NewClient(&redis.Options{Addr: REDISADDR,
+		Password: "", DB: 0}), time.Hour)
+
 	// This DSN is assuming the name of our docker image is "database"
 	// and that the name of our database is mysqldb.
 	// THIS IS SUBJECT TO CHANGE!!!!!
