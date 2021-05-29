@@ -29,7 +29,7 @@ type HandlerContext struct {
 
 type SessionState struct {
 	BeginTime time.Time
-	User      *models.Trainer
+	User      *models.User
 }
 
 // This function handles requests for the trainer resources. Only accept "POST" method for creating
@@ -43,18 +43,18 @@ func (handlerContext *HandlerContext) TrainersHandler(w http.ResponseWriter, r *
 			return
 		}
 		dec := json.NewDecoder(r.Body)
-		newTrainer := &trainer.NewTrainer{}
+		newTrainer := &models.NewUser{}
 		if err := dec.Decode(newTrainer); err != nil {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		validatedTrainer, err := newTrainer.ToTrainer()
+		validatedTrainer, err := newTrainer.ToUser()
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			return
 		}
 
-		handlerContext.TrainerStore.Insert(validatedUser)
+		handlerContext.TrainerStore.Insert(validatedTrainer)
 
 		/* TODO: Do we need to log the signed in trainers? */
 
@@ -67,12 +67,12 @@ func (handlerContext *HandlerContext) TrainersHandler(w http.ResponseWriter, r *
 
 		signKey := handlerContext.SignKey
 		sessionStore := handlerContext.SessionStore
-		sessionState := &SessionState{Trainer: validatedTrainer, BeginTime: time.Now()}
+		sessionState := &SessionState{User: validatedTrainer, BeginTime: time.Now()}
 		sessions.BeginSession(signKey, sessionStore, sessionState, w)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		enc := json.NewEncoder(w)
-		if err := enc.Encode(validatedUser); err != nil {
+		if err := enc.Encode(validatedTrainer); err != nil {
 			w.Write([]byte("Failed to encode user to JSON"))
 			return
 		}
@@ -96,7 +96,7 @@ func (handlerContext *HandlerContext) SpecificUserHandler(w http.ResponseWriter,
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	currentTrainer := sessionState.Trainer
+	currentTrainer := sessionState.User
 	if r.Method == http.MethodGet {
 		idString := path.Base(r.URL.Path)
 		userID, _ := strconv.ParseInt(idString, 10, 64)
@@ -117,7 +117,7 @@ func (handlerContext *HandlerContext) SpecificUserHandler(w http.ResponseWriter,
 		}
 	} else if r.Method == http.MethodPatch {
 		idString := path.Base(r.URL.Path)
-		if idString != "me" && strconv.FormatInt(currentTrainer.ID, 10) != idString {
+		if idString != "me" && strconv.FormatInt(currentTrainer.TrainerID, 10) != idString {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
@@ -133,7 +133,7 @@ func (handlerContext *HandlerContext) SpecificUserHandler(w http.ResponseWriter,
 			return
 		}
 		// TODO: Get current user and update it
-		err := currentUser.ApplyUpdates(updates)
+		err := currentTrainer.ApplyUpdates(updates)
 		if err != nil {
 			w.Write([]byte("Failed to update user"))
 			return
@@ -141,10 +141,78 @@ func (handlerContext *HandlerContext) SpecificUserHandler(w http.ResponseWriter,
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		enc := json.NewEncoder(w)
+		if err := enc.Encode(currentTrainer); err != nil {
+			w.Write([]byte("Failed to encode user to JSON"))
+			return
+		}
+		return
+	} else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func (handlerContext *HandlerContext) SessionsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		contentType := r.Header.Get("Content-Type")
+		if !strings.HasPrefix(contentType, "application/json") {
+			w.WriteHeader(http.StatusUnsupportedMediaType)
+			return
+		}
+		dec := json.NewDecoder(r.Body)
+		credentials := &models.Credentials{}
+		if err := dec.Decode(credentials); err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
+		userStore := handlerContext.TrainerStore
+		currentUser, err := userStore.GetByEmail(credentials.Email)
+		if err != nil {
+			fakePassword := "fakefakefakefake"
+			_ = currentUser.Authenticate(fakePassword)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		} else {
+			password := credentials.Password
+			err := currentUser.Authenticate(password)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+		}
+		signKey := handlerContext.SignKey
+		sessionStore := handlerContext.SessionStore
+		sessionState := &SessionState{User: currentUser, BeginTime: time.Now()}
+		sessions.BeginSession(signKey, sessionStore, sessionState, w)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		enc := json.NewEncoder(w)
 		if err := enc.Encode(currentUser); err != nil {
 			w.Write([]byte("Failed to encode user to JSON"))
 			return
 		}
+		return
+	} else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func (handlerContext *HandlerContext) SpecificSessionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodDelete {
+		if path.Base(r.URL.Path) != "mine" {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("Unauthorized status"))
+			return
+		}
+		signKey := handlerContext.SignKey
+		sessionStore := handlerContext.SessionStore
+		_, err := sessions.EndSession(r, signKey, sessionStore)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
+		w.Write([]byte("Signed out"))
 		return
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
