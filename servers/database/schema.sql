@@ -54,7 +54,7 @@ create table if not exists Pokemon (
 /*trainer*/
 create table if not exists Team (
     TeamID int not null auto_increment primary key,
-    TrainerID int foreign key references Trainer(TrainerID)
+    TrainerID int foreign key references User(TrainerID)
 );
 
 

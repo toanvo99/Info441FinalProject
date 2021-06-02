@@ -37,10 +37,4 @@ type Store interface {
 
 	//deletes userlog with given ID
 	DeleteUserLog(id int64) error
-
-	//make a new Pokemon team
-	MakeNewTeam(id int64) (*Team, error)
-
-	//delete a pokemon team
-	DeleteTeam(id int64) error
 }
