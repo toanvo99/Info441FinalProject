@@ -217,36 +217,3 @@ func (ss *SQLStore) DeleteUserLog(id int64) error {
 	}
 	return nil
 }
-
-// NOT SURE IF THIS WORKS
-func (ss *SQLStore) MakeNewTeam(user *User) (*Team, error) {
-	insertQuery := "INSERT into Team (TrainerID) VALUES (?)"
-	response, err := ss.Database.Exec(insertQuery, user.TrainerID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	team := &Team{}
-
-	id, err2 := response.LastInsertId()
-
-	if err2 != nil {
-		return nil, err2
-	}
-
-	team.TrainerID = id
-	return team, nil
-
-}
-
-func (ss *SQLStore) DeleteTeam(id int64) error {
-	insertQuery := "DELETE FROM Team WHERE TeamID=?"
-	_, err := ss.Database.Exec(insertQuery,
-		id,
-	)
-	if err != nil {
-		return err
-	}
-	return nil
-}
