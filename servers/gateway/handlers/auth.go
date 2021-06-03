@@ -4,6 +4,7 @@ import (
 	"Info441FinalProject/servers/gateway/models"
 	"Info441FinalProject/servers/gateway/sessions"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"path"
 	"strconv"
@@ -11,16 +12,6 @@ import (
 	"time"
 )
 
-// TODO
-// Similar to our past assignments, this .go file will handle any necessary user/session authentication
-// for preforming requests to our API.
-
-// Handler context struct that
-//will be a receiver on any of your HTTP
-//handler functions that need access to
-//globals, such as the key used for signing
-//and verifying SessionIDs, the session store
-//and the trainer store
 type HandlerContext struct {
 	SignKey      string
 	SessionStore sessions.Store
@@ -56,15 +47,6 @@ func (handlerContext *HandlerContext) TrainersHandler(w http.ResponseWriter, r *
 
 		handlerContext.TrainerStore.Insert(validatedTrainer)
 
-		/* TODO: Do we need to log the signed in trainers? */
-
-		// if len(r.Header.Get("X-Forwarded-For")) > 0 {
-		// 	ips := strings.Split(r.Header.Get("X-Forwarded-For"), ", ")
-		// 	handlerContext.UserStore.InsertLog(validatedUser.ID, ips[0])
-		// } else {
-		// 	handlerContext.UserStore.InsertLog(validatedUser.ID, r.RemoteAddr)
-		// }
-
 		signKey := handlerContext.SignKey
 		sessionStore := handlerContext.SessionStore
 		sessionState := &SessionState{User: validatedTrainer, BeginTime: time.Now()}
@@ -92,8 +74,8 @@ func (handlerContext *HandlerContext) SpecificUserHandler(w http.ResponseWriter,
 	sessionState := &SessionState{}
 	_, err := sessions.GetState(r, signKey, sessionStore, sessionState)
 	if err != nil {
-		w.Write([]byte(err.Error()))
 		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(fmt.Sprintf("Failed to get the state %v", err)))
 		return
 	}
 	currentTrainer := sessionState.User
@@ -102,8 +84,8 @@ func (handlerContext *HandlerContext) SpecificUserHandler(w http.ResponseWriter,
 		userID, _ := strconv.ParseInt(idString, 10, 64)
 		user, err := handlerContext.TrainerStore.GetByID(userID)
 		if err != nil {
-			w.Write([]byte(err.Error()))
 			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(err.Error()))
 			return
 		} else {
 			w.Header().Set("Content-Type", "application/json")
@@ -168,8 +150,6 @@ func (handlerContext *HandlerContext) SessionsHandler(w http.ResponseWriter, r *
 		userStore := handlerContext.TrainerStore
 		currentUser, err := userStore.GetByEmail(credentials.Email)
 		if err != nil {
-			fakePassword := "fakefakefakefake"
-			_ = currentUser.Authenticate(fakePassword)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		} else {
@@ -184,6 +164,13 @@ func (handlerContext *HandlerContext) SessionsHandler(w http.ResponseWriter, r *
 		sessionStore := handlerContext.SessionStore
 		sessionState := &SessionState{User: currentUser, BeginTime: time.Now()}
 		sessions.BeginSession(signKey, sessionStore, sessionState, w)
+		// This section is for eventually adding user logs
+		/* if len(r.Header.Get("X-Forwarded-For")) > 0 {
+			ips := strings.Split(r.Header.Get("X-Forwarded-For"), ", ")
+			handlerContext.TrainerStore.InsertLog(currentUser.ID, ips[0])
+		} else {
+			handlerContext.TrainerStore.InsertLog(currentUser.ID, r.RemoteAddr)
+		} */
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		enc := json.NewEncoder(w)

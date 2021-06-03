@@ -6,7 +6,6 @@ export function PokemonForms(props) {
     const [pokemon, setPokemon] = useState("");
     const [sprites, setSprites] = useState([]);
     const [submitted, setSubmitted] = useState(false);
-    user = "hey there";
     const submitTeam = (event) => {
         event.preventDefault();
         console.log("succesful submit! ");
