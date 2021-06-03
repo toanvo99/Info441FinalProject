@@ -5,12 +5,31 @@ export function PokemonForms(props) {
     let user = props.user;
     const [pokemon, setPokemon] = useState("");
     const [sprites, setSprites] = useState([]);
+    const [submitted, setSubmitted] = useState(false);
     user = "hey there";
-    //user = "hey there folks"
+    const submitTeam = (event) => {
+        event.preventDefault();
+        console.log("succesful submit! ");
+        setSprites([]);
+        setSubmitted(true);
+    }
     if (user) {
         return (
             <div className="poke-form">
-                <PokemonSearchForm pokemon={pokemon}  setPokemon={setPokemon} sprites={sprites} setSprites={setSprites}/>
+                <PokemonSearchForm 
+                    submitTeam={submitTeam} 
+                    pokemon={pokemon}  
+                    setPokemon={setPokemon} 
+                    sprites={sprites} 
+                    setSprites={setSprites}/>
+                {submitted ? 
+                    <h3 id="success_submit" >
+                        Succesfully Submitted!
+                    </h3>
+                    :
+                    <div>  
+                    </div>
+                }
             </div>
         )
     } else {
@@ -34,7 +53,7 @@ function PokemonSearchForm(props) {
             <label htmlFor="change_description">Search Pokemon Database:</label>
             <input id="search_pokemon" className="form-control" type="text" name="term" aria-label="Pokemon Search" placeholder="Ex: piplup" value={props.pokemon} onChange={handlePokeSearch}></input>
         </form>*/
-        <form action="/" method="get">
+        <form action="/" method="get" onSubmit={props.submitTeam}>
             <label htmlFor="header-search">
                 <span className="visually-hidden">Search pokemon</span>
             </label>
@@ -46,7 +65,15 @@ function PokemonSearchForm(props) {
                 onChange={handlePokeSearch}
                 name="s" 
             />
-            <PokemonSearchButton  pokemon={props.pokemon} sprites={props.sprites} setSprites={props.setSprites}/>
+            <PokemonSearchButton  pokemon={props.pokemon} 
+                sprites={props.sprites}
+                setIsTeam={props.isTeam}
+                setSprites={props.setSprites}/>
+            {props.sprites.length !== 0 ?
+                <input id="submit" onSubmit={props.submitTeam} type="submit" value="Submit Team" />
+                :
+                <div></div>
+            }
         </form>
     )
 }
@@ -59,7 +86,7 @@ function PokemonSearchButton(props) {
 
         // TESTING CODE/ Code for demo.
         let paths = props.sprites;
-        if (pokemon) {
+        if (pokemon && props.sprites.length < 6) {
             //print(pokemon);
             if (pokemon === "empoleon") {
                 paths.push("./img/emp_sprite.png");
@@ -80,8 +107,6 @@ function PokemonSearchButton(props) {
                 paths.push("./img/steelix_sprite.png");
                 props.setSprites(paths);
             }
-            for (let i = 0; i < props.sprites.length; i++)
-                console.log(i + " " + props.sprites[i]);
         } else {
 
         }
@@ -96,13 +121,9 @@ function PokemonSearchButton(props) {
         <button id="search_button" type="submit" className="btn btn-primary" onClick={handleClick}>Search!</button>
         <div>
             {props.sprites.map(item => (
-                <img key="test" src={item} alt="poke sprite" />
+                <img src={item} alt="poke sprite" />
             ))} 
           </div>
       </div>
     )
-  }
-
-  function TeamSubmitButton(props) {
-      
   }
