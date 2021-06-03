@@ -2,6 +2,7 @@ package teamsrc
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type TeamSQLStore struct {
@@ -85,3 +86,30 @@ func (ss *TeamSQLStore) DeleteTeam(id int64) error {
 	}
 	return nil
 }
+
+// Add a pokemon to the given team
+func (ss *TeamSQLStore) AddPokemonToTeam(teamID int64, pid int64) error {
+	insertQuery := "INSERT INTO PokemonTeam (PokemonID, PokemonTeamID) VALUES (?, ?)"
+	resp, err := ss.Database.Exec(insertQuery, pid, teamID)
+	if err != nil {
+		return fmt.Errorf("failed to insert %v", err)
+	}
+	return nil
+}
+
+// Delete a pokemon from the given team
+func (ss *TeamSQLStore) DeletePokemonFromTeam(teamID int64, pid int64) (*Team, error) {
+	delq := "delete from PokemonTeam where PokemonTeamID=? and PokemonID=?"
+	_, err := cs.db.Exec(delq, teamID, pid)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete pokemon from team %v", err)
+	}
+	newTeam, err := cs.GetTeamByID(teamID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve updated channel %v", err)
+	}
+	return newTeam, nil
+}
+
+
+

@@ -132,4 +132,64 @@ func (tc *TeamContext) TeamManageHandler(w http.ResponseWriter, r *http.Request)
 	}
 	// creating a team
 	/***** use a POST METHOD***/
+
+}
+
+// TeamBuilderHandler handles pokemon in the current team
+// "/v1/{userID}/{teamID}"
+func (tc *TeamContext) TeamBuilderHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("X-User") != "" {
+		http.Error(w, "Not authenticated", http.StatusUnauthorized)
+	}
+	u := users.User{}
+	err := json.NewDecoder(strings.NewReader(r.Header.Get("X-User"))).Decode(&u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	urlID := strings.Split(r.URL.Path, "/")[len(strings.Split(r.URL.Path, "/"))-1]
+	teamid, err := strconv.ParseInt(urlID, 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	curTeam, err = tc.TeamStore.TeamGetByID(teamid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// POST: Add pokemon to the current team
+	if r.Method == http.MethodPost {
+		dec := json.NewDecoder(r.body)
+		pokemonToAdd := &Pokemon{}
+		if err := dec.Decode(pokemonToAdd); err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
+		curTeam.Pokemons = append(curTeam.Pokemons, pokemonToAdd)
+		err := tc.Database.AddPokemonToTeam(curTeam.TeamID, pokemonToAdd.PokemonID)
+		if err != nil {
+			fmt.Printf("failed to add pokemon to current team: %v", err.Error())
+			return
+		}
+		w.Write([]byte("pokemon was successfully added to the team"))
+		w.WriteHeader(http.StatusCreated)
+		return
+	}
+	// DELETE: Remove pokemon given by the request body from the current team
+	if r.Method == http.MethodDelete {
+		pokemonToDel := &Pokemon{}
+		if err := dec.Decode(pokemonToDel); err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
+		_, err := tc.Database.DeletePokemonFromTeam(curTeam.TeamID, pokemonToDel.PokemonID)
+		if err != nil {
+			fmt.Printf("failed to delete pokemon from current team: %v", err.Error())
+			return
+		}
+		w.Write([]byte("the user was successfully removed from the team"))
+		w.WriteHeader(200)
+		return
+	}
 }
