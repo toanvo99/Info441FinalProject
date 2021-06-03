@@ -55,7 +55,7 @@ func (ss *TeamSQLStore) TeamGetByID(id int64) (*Team, error) {
 }
 
 // NOT SURE IF THIS WORKS
-func (ss *TeamSQLStore) MakeNewTeam(user *User) (*Team, error) {
+func (ss *TeamSQLStore) MakeNewTeam(uid int64) (*Team, error) {
 	insertQuery := "INSERT into Team (TrainerID) VALUES (?)"
 	response, err := ss.Database.Exec(insertQuery, user.TrainerID)
 
@@ -79,7 +79,7 @@ func (ss *TeamSQLStore) MakeNewTeam(user *User) (*Team, error) {
 func (ss *TeamSQLStore) DeleteTeam(id int64) error {
 	insertQuery := "DELETE FROM Team WHERE TeamID=?"
 	_, err := ss.Database.Exec(insertQuery,
-		id,
+		id
 	)
 	if err != nil {
 		return err

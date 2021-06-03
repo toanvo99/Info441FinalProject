@@ -96,6 +96,7 @@ func (tc *TeamContext) AllTeamHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // managing the team
+// "/v1/{userID}"
 func (tc *TeamContext) TeamManageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("X-User") != "" {
 		http.Error(w, "Not authenticated", http.StatusUnauthorized)
@@ -107,7 +108,7 @@ func (tc *TeamContext) TeamManageHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	// deleting a team
-	if r.Method != "DELETE" {
+	if r.Method == "DELETE" {
 		urlID := strings.Split(r.URL.Path, "/")[len(strings.Split(r.URL.Path, "/"))-1]
 		teamid, err := strconv.ParseInt(urlID, 10, 64)
 		if err != nil {
@@ -130,13 +131,33 @@ func (tc *TeamContext) TeamManageHandler(w http.ResponseWriter, r *http.Request)
 		}
 		fmt.Fprintf(w, "Team successfully deleted")
 	}
-	// creating a team
+	// creating a team using JSON from request body
 	/***** use a POST METHOD***/
-
+	if r.Method == http.MethodPost {
+		dec := json.NewDecoder(r.body)
+		newTeam := &Team{}
+		if err := dec.Decode(newTeam); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		newTeam, err := tc.Database.MakeNewTeam(u.TrainerID)
+		if err != nil {
+			fmt.Printf("error inserting channel: %v\n", err)
+		}
+		// response with JSON formatted newly created team
+		enc := json.NewEncoder(w)
+		if err := enc.Encode(newTeam); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusCreated)
+		w.Header().Set("Content-Type", "application-json")
+		return
+	}
 }
 
 // TeamBuilderHandler handles pokemon in the current team
-// "/v1/{userID}/{teamID}"
+// "/v1/teams/{teamID}"
 func (tc *TeamContext) TeamBuilderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("X-User") != "" {
 		http.Error(w, "Not authenticated", http.StatusUnauthorized)
@@ -163,7 +184,7 @@ func (tc *TeamContext) TeamBuilderHandler(w http.ResponseWriter, r *http.Request
 		dec := json.NewDecoder(r.body)
 		pokemonToAdd := &Pokemon{}
 		if err := dec.Decode(pokemonToAdd); err != nil {
-			w.Write([]byte(err.Error()))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		curTeam.Pokemons = append(curTeam.Pokemons, pokemonToAdd)
@@ -180,7 +201,7 @@ func (tc *TeamContext) TeamBuilderHandler(w http.ResponseWriter, r *http.Request
 	if r.Method == http.MethodDelete {
 		pokemonToDel := &Pokemon{}
 		if err := dec.Decode(pokemonToDel); err != nil {
-			w.Write([]byte(err.Error()))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		_, err := tc.Database.DeletePokemonFromTeam(curTeam.TeamID, pokemonToDel.PokemonID)
