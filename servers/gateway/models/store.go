@@ -30,10 +30,10 @@ type Store interface {
 	Delete(id int64) error
 
 	//inserts a login into Login table
-	InsertUserLog(userLog *UserLog) (*UserLog, error)
+	//InsertUserLog(userLog *UserLog) (*UserLog, error)
 
 	//returns the userLog with the given ID
-	GetUserLogByID(id int64) (*UserLog, error)
+	//GetUserLogByID(id int64) (*UserLog, error)
 
 	//deletes userlog with given ID
 	DeleteUserLog(id int64) error

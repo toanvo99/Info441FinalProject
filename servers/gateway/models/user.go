@@ -56,6 +56,13 @@ type Updates struct {
 	LastName  string `json:"lastName"`
 }
 
+// If we want to include logs in the future
+/* type UserLog struct {
+	LogInID int64  `json:"loginID"`
+	LogDate string `json:"loginDate"`
+	IpAddr  string `json:"ipAddr"`
+} */
+
 //Validate validates the new user and returns an error if
 //any of the validation rules fail, or nil if its valid
 func (nu *NewUser) Validate() error {

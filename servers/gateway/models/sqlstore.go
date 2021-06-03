@@ -160,7 +160,10 @@ func (ss *SQLStore) Delete(id int64) error {
 	return nil
 }
 
-func (ss *SQLStore) InsertUserLog(uLog *UserLog) (*UserLog, error) {
+// FUNCTIONS BELOW HANDLE USER LOGGING
+// Logs are not currently supported in our database. We can decide whether or not we would like to include them later
+
+/* func (ss *SQLStore) InsertUserLog(uLog *UserLog) (*UserLog, error) {
 	insertQuery := "INSERT into loginTable (ID, LoginDateTime, clientIP) VALUES (?,?,?)"
 	response, err := ss.Database.Exec(insertQuery,
 		uLog.LogInID,
@@ -216,4 +219,4 @@ func (ss *SQLStore) DeleteUserLog(id int64) error {
 		return err
 	}
 	return nil
-}
+} */
