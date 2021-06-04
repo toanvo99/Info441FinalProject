@@ -16,25 +16,27 @@ func NewTeamSQLStore(database *sql.DB) *TeamSQLStore {
 }
 
 //show all of the team
-func (ss *TeamSQLStore) AllTeamsGetByID(id int64) ([]*Team, error) {
+func (ss *TeamSQLStore) AllTeamsGetByName(trainer string) ([]*Team, error) {
 	var allTeams []*Team
-	queryOne := "SELECT t.TeamID, p.PokemonID FROM Team t join (Pokemon p, PokemonTeam pt, User u) ON (u.TrainierID == t.TrainerID AND t.TeamID == pt.MoveSetID AND p.PokemonID == pt.PokemonID where u.ID = ?"
-	rows, err := ss.Database.Query(queryOne, id)
+	queryOne := "SELECT * FROM Team where Trainer.Username = ?"
+	rows, err := ss.Database.Query(queryOne, trainer)
 	if err != nil {
 		return nil, err
 	}
-	pokemonteam := PokemonTeam{}
+	pokemon := Pokemon{}
 	defer rows.Close()
 	for rows.Next() {
 		if err2 := rows.Scan(
-			&pokemonteam.PokemonID,
-			&pokemonteam.MoveSetID,
+			&pokemon.PokemonID,
+			&pokemon.Species,
+			&pokemon.Type1,
+			&pokemon.Type2,
 		); err2 != nil {
 			return nil, err2
 		}
-		allTeams = append(allTeam, &pokemonteam)
+		allTeams = append(allTeams, &pokemon)
 	}
-	return allTeams
+	return allTeams, nil
 }
 
 // show a team based on team id
@@ -48,34 +50,34 @@ func (ss *TeamSQLStore) TeamGetByID(id int64) (*Team, error) {
 	for rows.Next() {
 		if err2 := rows.Scan(
 			&team.TeamID,
-			&team.TrainerID,
+			&team.Trainer,
+			&team.Pokemons,
 		); err2 != nil {
 			return nil, err2
 		}
 	}
-	return team, nil
+	return &team, nil
 }
 
-// NOT SURE IF THIS WORKS
-func (ss *TeamSQLStore) MakeNewTeam(uid int64) (*Team, error) {
-	insertQuery := "INSERT into Team (TrainerID) VALUES (?)"
-	response, err := ss.Database.Exec(insertQuery, uid)
-
+// add a team
+func (ss *TeamSQLStore) MakeNewTeam(t *Team) (*Team, error) {
+	insertQuery := "INSERT into Team (Trainer, Pokemons VALUES (?,?)"
+	response, err := ss.Database.Exec(insertQuery,
+		t.Trainer,
+		t.Pokemons,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	team := &Team{}
-
 	id, err2 := response.LastInsertId()
-
 	if err2 != nil {
-		return nil, err2
+		return nil, err
 	}
 
-	team.TrainerID = id
-	return team, nil
+	t.TeamID = id
 
+	return t, nil
 }
 
 func (ss *TeamSQLStore) DeleteTeam(id int64) error {

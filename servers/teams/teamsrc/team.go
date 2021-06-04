@@ -43,6 +43,7 @@ type TeamContext struct {
 }
 
 // this is for displaying all of the team the user have (with Pokemon as well?)
+// "/v1/teams"
 func (tc *TeamContext) AllTeamHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("X-User") != "" {
 		http.Error(w, "Not authenticated", http.StatusUnauthorized)
@@ -54,7 +55,7 @@ func (tc *TeamContext) AllTeamHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == "GET" {
-		teamList, err := tc.TeamStore.AllTeamsGetByID(u.ID)
+		teamList, err := tc.TeamStore.AllTeamsGetByName(u.UserName)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -80,15 +81,15 @@ func (tc *TeamContext) AllTeamHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		t := Team{}
 		err := json.NewDecoder(r.Body).Decode(&t)
-		if t.TeamID == "" {
-			http.Error(w, "team ID doesn't exit", http.StatusBadRequest)
+		if t.Trainer.UserName == "" {
+			http.Error(w, "Trainers doesn't exit", http.StatusBadRequest)
 			return
 		}
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		teamInsert, err := tc.TeamStore.AddChannel(&t)
+		teamInsert, err := tc.TeamStore.MakeNewTeam(&t)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
