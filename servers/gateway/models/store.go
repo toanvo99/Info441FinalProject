@@ -29,6 +29,7 @@ type Store interface {
 	//Delete deletes the user with the given ID
 	Delete(id int64) error
 
+	// BELOW IS ALL STUFF FOR LOGGING IF WE WANT TO IMPLEMENT IT
 	//inserts a login into Login table
 	//InsertUserLog(userLog *UserLog) (*UserLog, error)
 
@@ -36,5 +37,5 @@ type Store interface {
 	//GetUserLogByID(id int64) (*UserLog, error)
 
 	//deletes userlog with given ID
-	DeleteUserLog(id int64) error
+	//DeleteUserLog(id int64) error
 }

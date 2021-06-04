@@ -7,6 +7,8 @@ import (
 	"os/user"
 	"strconv"
 	"strings"
+
+	"github.com/info441-sp21/assignments-tomgerber/servers/gateway/models/users"
 )
 
 //Team represents the pokemon team a trainier will have
@@ -24,9 +26,20 @@ type Pokemon struct {
 	Type2     string `json:type2"`
 }
 
+// user struct as it will be needed by our handlers
+type User struct {
+	TrainerID int64  `json:"trainerID"`
+	Email     string `json:"-"`
+	PassHash  []byte `json:"-"`
+	UserName  string `json:"userName"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	PhotoURL  string `json:"photoURL"`
+}
+
 //from teamstore.go for SQL query function
 type TeamContext struct {
-	TeamStore TeamSQLStore
+	TeamStore *TeamSQLStore
 }
 
 // this is for displaying all of the team the user have (with Pokemon as well?)

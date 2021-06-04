@@ -9,13 +9,13 @@ type TeamSQLStore struct {
 	Database *sql.DB
 }
 
-func newTeamSQLStore(database *sql.DB) *TeamSQLStore {
+func NewTeamSQLStore(database *sql.DB) *TeamSQLStore {
 	return &TeamSQLStore{
 		Database: database,
 	}
 }
 
-//show all of the team 
+//show all of the team
 func (ss *TeamSQLStore) AllTeamsGetByID(id int64) ([]*Team, error) {
 	var allTeams []*Team
 	queryOne := "SELECT t.TeamID, p.PokemonID FROM Team t join (Pokemon p, PokemonTeam pt, User u) ON (u.TrainierID == t.TrainerID AND t.TeamID == pt.MoveSetID AND p.PokemonID == pt.PokemonID where u.ID = ?"
@@ -33,7 +33,9 @@ func (ss *TeamSQLStore) AllTeamsGetByID(id int64) ([]*Team, error) {
 			return nil, err2
 		}
 		allTeams = append(allTeam, &pokemonteam)
+	}
 	return allTeams
+}
 
 // show a team based on team id
 func (ss *TeamSQLStore) TeamGetByID(id int64) (*Team, error) {
@@ -50,14 +52,14 @@ func (ss *TeamSQLStore) TeamGetByID(id int64) (*Team, error) {
 		); err2 != nil {
 			return nil, err2
 		}
-	}	
+	}
 	return team, nil
 }
 
 // NOT SURE IF THIS WORKS
 func (ss *TeamSQLStore) MakeNewTeam(uid int64) (*Team, error) {
 	insertQuery := "INSERT into Team (TrainerID) VALUES (?)"
-	response, err := ss.Database.Exec(insertQuery, user.TrainerID)
+	response, err := ss.Database.Exec(insertQuery, uid)
 
 	if err != nil {
 		return nil, err
@@ -78,9 +80,7 @@ func (ss *TeamSQLStore) MakeNewTeam(uid int64) (*Team, error) {
 
 func (ss *TeamSQLStore) DeleteTeam(id int64) error {
 	insertQuery := "DELETE FROM Team WHERE TeamID=?"
-	_, err := ss.Database.Exec(insertQuery,
-		id
-	)
+	_, err := ss.Database.Exec(insertQuery, id)
 	if err != nil {
 		return err
 	}
@@ -110,6 +110,3 @@ func (ss *TeamSQLStore) DeletePokemonFromTeam(teamID int64, pid int64) (*Team, e
 	}
 	return newTeam, nil
 }
-
-
-
