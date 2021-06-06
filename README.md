@@ -11,7 +11,8 @@ Our project revolves around creating an online pokemon database. Pokemon fans wo
 
 ## Updated Technical Diagrams/Addendum
 
-![image](https://user-images.githubusercontent.com/59586227/120914796-3a71fa00-c655-11eb-9a4b-8649cf135ac3.png)
+![image](https://user-images.githubusercontent.com/59586227/120914861-9472bf80-c655-11eb-9c05-61bf8aae70cf.png)
+
 
 ## Technical Description:
 
