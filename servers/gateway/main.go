@@ -131,3 +131,18 @@ func main() {
 	log.Printf("server is listening at http://%s", addr)
 	log.Fatal(http.ListenAndServe(addr, mux))
 }
+
+/*
+func fillDB(db *sql.DB) {
+	insq := "Query to insert a single pokemon into a database"
+	// Poke api says you can get with a number corresponding to its
+	// pokedex entry. This should get every pokemon and insert it into the
+	// db.
+	for (int i = 1; i <= total num of pokemon; i++) {
+		current = pokeapi.Pokemon(i)
+		response, err := ss.Database.Exec(insertQuery,
+		current
+		)
+	}
+}
+*/
