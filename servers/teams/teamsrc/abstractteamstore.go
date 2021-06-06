@@ -10,4 +10,10 @@ type TeamStore interface {
 
 	//delete a pokemon team
 	DeleteTeam(id int64) error
+
+	//delete pokemon from team
+	DeletePokemonFromTeam(teamID int64, pid int64) (*Team, error)
+
+	//add pokemon to team
+	AddPokemonToTeam(teamID int64, pokemon string) error
 }

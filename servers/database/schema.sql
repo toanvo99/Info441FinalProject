@@ -27,6 +27,7 @@ create table if not exists [Move] (
     MoveID int not null auto_increment primary key,
     TypeID int not null foreign key references [Type](TypeID),
     DamageID int not null foreign key references Damage(DamageID),
+    MoveName varchar(25) not null,      
     MoveDesc varchar(500) not null,
     [Power] int not null
 );
@@ -42,7 +43,8 @@ create table if not exists Species (
     SpeciesID int not null auto_increment primary key,
     Type1ID int not null foreign key references Type(TypeID),
     Type2ID int null foreign key references Type(TypeID),
-    SpeciesName varchar(128) not null
+    SpeciesName varchar(128) not null,
+    Sprite varchar(1000) not null
 );
 
 /*species*/

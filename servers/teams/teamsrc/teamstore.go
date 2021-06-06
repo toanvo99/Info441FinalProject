@@ -3,6 +3,7 @@ package teamsrc
 import (
 	"database/sql"
 	"fmt"
+	"github.com/mtslzr/pokeapi-go"
 )
 
 type TeamSQLStore struct {
@@ -18,7 +19,7 @@ func NewTeamSQLStore(database *sql.DB) *TeamSQLStore {
 //show all of the team
 func (ss *TeamSQLStore) AllTeamsGetByName(trainer string) ([]*Team, error) {
 	var allTeams []*Team
-	queryOne := "SELECT * FROM Team where Trainer.Username = ?"
+	queryOne := "SELECT * FROM Team T join User U on T.TrainerID = U.TrainerID join PokemonTeam PT on T.TeamID = PT.TeamID join Pokemon P on P.PokemonID = PT.PokemonID where Team.UserName = ?"
 	rows, err := ss.Database.Query(queryOne, trainer)
 	if err != nil {
 		return nil, err
@@ -41,7 +42,7 @@ func (ss *TeamSQLStore) AllTeamsGetByName(trainer string) ([]*Team, error) {
 
 // show a team based on team id
 func (ss *TeamSQLStore) TeamGetByID(id int64) (*Team, error) {
-	rows, err := ss.Database.Query("SELECT * FROM team WHERE teamID=?", id)
+	rows, err := ss.Database.Query("SELECT * FROM Team join PokemonTeam PT on T.TeamID = P.TeamID join Pokemon P WHERE TeamID=?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func (ss *TeamSQLStore) TeamGetByID(id int64) (*Team, error) {
 		if err2 := rows.Scan(
 			&team.TeamID,
 			&team.Trainer,
-			&team.Pokemons,
+			,
 		); err2 != nil {
 			return nil, err2
 		}
@@ -61,7 +62,7 @@ func (ss *TeamSQLStore) TeamGetByID(id int64) (*Team, error) {
 
 // add a team
 func (ss *TeamSQLStore) MakeNewTeam(t *Team) (*Team, error) {
-	insertQuery := "INSERT into Team (Trainer, Pokemons VALUES (?,?)"
+	insertQuery := "INSERT into Team (Trainer, Pokemon) VALUES (?,?)"
 	response, err := ss.Database.Exec(insertQuery,
 		t.Trainer,
 		t.Pokemons,
@@ -90,9 +91,9 @@ func (ss *TeamSQLStore) DeleteTeam(id int64) error {
 }
 
 // Add a pokemon to the given team
-func (ss *TeamSQLStore) AddPokemonToTeam(teamID int64, pid int64) error {
+func (ss *TeamSQLStore) AddPokemonToTeam(teamID int64, pokemon string) error {
 	insertQuery := "INSERT INTO PokemonTeam (PokemonID, PokemonTeamID) VALUES (?, ?)"
-	resp, err := ss.Database.Exec(insertQuery, pid, teamID)
+	_, err := ss.Database.Exec(insertQuery, pid, teamID)
 	if err != nil {
 		return fmt.Errorf("failed to insert %v", err)
 	}
@@ -101,12 +102,12 @@ func (ss *TeamSQLStore) AddPokemonToTeam(teamID int64, pid int64) error {
 
 // Delete a pokemon from the given team
 func (ss *TeamSQLStore) DeletePokemonFromTeam(teamID int64, pid int64) (*Team, error) {
-	delq := "delete from PokemonTeam where PokemonTeamID=? and PokemonID=?"
-	_, err := cs.db.Exec(delq, teamID, pid)
+	delq := "delete from PokemonTeam where TeamID=? and PokemonID=?"
+	_, err := ss.Database.Exec(delq, teamID, pid)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete pokemon from team %v", err)
 	}
-	newTeam, err := cs.GetTeamByID(teamID)
+	newTeam, err := ss.TeamGetByID(teamID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve updated channel %v", err)
 	}
