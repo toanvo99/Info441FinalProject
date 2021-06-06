@@ -9,6 +9,10 @@ Ultimately, we may add even more features to our enhanced Pokemon Showdown user 
 ## Project Description:
 Our project revolves around creating an online pokemon database. Pokemon fans would be the main target audience because there is a website called pokemonshowdown.com that lets you create teams and battle with them. However, there is no way to store teams online; when you make a team it is stored locally. We want to build this because when a person wants to access a team they already made but on a new computer, they can’t access it.
 
+## Updated Technical Diagrams/Addendum
+
+![image](https://user-images.githubusercontent.com/59586227/120914796-3a71fa00-c655-11eb-9a4b-8649cf135ac3.png)
+
 ## Technical Description:
 
 <img width="1044" alt="Screen Shot 2021-05-17 at 9 01 33 PM" src="https://user-images.githubusercontent.com/43588965/118588359-13f62880-b753-11eb-8391-084ae221cbe9.png">
