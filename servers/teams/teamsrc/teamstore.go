@@ -59,7 +59,7 @@ func (ss *TeamSQLStore) TeamGetByID(id int64) (*Team, error) {
 		); err2 != nil {
 			return nil, err2
 		}
-		&team = append(&team, &pokemonlist)
+		team.Pokemons = append(team.Pokemons, &pokemonlist)
 	}
 	return &team, nil
 }

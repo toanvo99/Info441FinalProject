@@ -7,8 +7,6 @@ import (
 	"os/user"
 	"strconv"
 	"strings"
-
-	"github.com/info441-sp21/assignments-tomgerber/servers/gateway/models/users"
 )
 
 //Team represents the pokemon team a trainier will have
@@ -49,7 +47,7 @@ func (tc *TeamContext) AllTeamHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("X-User") != "" {
 		http.Error(w, "Not authenticated", http.StatusUnauthorized)
 	}
-	u := users.User{}
+	u := User{}
 	err := json.NewDecoder(strings.NewReader(r.Header.Get("X-User"))).Decode(&u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -116,7 +114,7 @@ func (tc *TeamContext) TeamManageHandler(w http.ResponseWriter, r *http.Request)
 	if r.Header.Get("X-User") != "" {
 		http.Error(w, "Not authenticated", http.StatusUnauthorized)
 	}
-	u := users.User{}
+	u := User{}
 	err := json.NewDecoder(strings.NewReader(r.Header.Get("X-User"))).Decode(&u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -135,7 +133,7 @@ func (tc *TeamContext) TeamManageHandler(w http.ResponseWriter, r *http.Request)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		errDelete := tc.TeamStore.DeleteTeam(teamid, u.ID)
+		errDelete := tc.TeamStore.DeleteTeam(teamid)
 		if errDelete != nil {
 			if errDelete.Error() == "Team not found" {
 				http.Error(w, errDelete.Error(), http.StatusForbidden)
@@ -155,7 +153,7 @@ func (tc *TeamContext) TeamManageHandler(w http.ResponseWriter, r *http.Request)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		newTeam, err := tc.TeamStore.MakeNewTeam(u.TrainerID)
+		newTeam, err := tc.TeamStore.MakeNewTeam(newTeam)
 		if err != nil {
 			fmt.Printf("error inserting channel: %v\n", err)
 		}
@@ -177,7 +175,7 @@ func (tc *TeamContext) TeamBuilderHandler(w http.ResponseWriter, r *http.Request
 	if r.Header.Get("X-User") != "" {
 		http.Error(w, "Not authenticated", http.StatusUnauthorized)
 	}
-	u := users.User{}
+	u := User{}
 	err := json.NewDecoder(strings.NewReader(r.Header.Get("X-User"))).Decode(&u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
