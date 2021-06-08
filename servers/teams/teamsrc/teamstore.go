@@ -90,9 +90,32 @@ func (ss *TeamSQLStore) DeleteTeam(id int64) error {
 }
 
 // Add a pokemon to the given team
-func (ss *TeamSQLStore) AddPokemonToTeam(teamID int64, pid int64) error {
-	insertQuery := "INSERT INTO PokemonTeam (PokemonID, PokemonTeamID) VALUES (?, ?)"
-	resp, err := ss.Database.Exec(insertQuery, pid, teamID)
+func (ss *TeamSQLStore) AddPokemonToTeam(teamID int64, pokemon string) error {
+	insertQuery := "SELECT S.SpeciesID FROM Species S WHERE S.SpeciesName = ?"
+	resp1, err := ss.Database.Query(insertQuery, pokemon)
+	if err != nil {
+		return fmt.Errorf("failed to find Pokemon %v", err)
+	}
+	defer resp1.Close()
+	var pid int64
+	for resp1.Next() {
+		if err2 := resp1.Scan(
+			&pid,
+		); err2 != nil {
+			return err2
+		}
+	}
+	insertQuery2 := "INSERT INTO Pokemon (SpeciesID) VALUES (?)"
+	resp2, err := ss.Database.Exec(insertQuery2, pid)
+	if err != nil {
+		return fmt.Errorf("failed to insert %v", err)
+	}
+	id, err2 := resp2.LastInsertId()
+	if err2 != nil {
+		return fmt.Errorf("failed to insert %v", err2)
+	}
+	insertQuery3 := "INSERT INTO PokemonTeam (PokemonID, PokemonTeamID) VALUES (?, ?)"
+	_, err = ss.Database.Exec(insertQuery3, id, teamID)
 	if err != nil {
 		return fmt.Errorf("failed to insert %v", err)
 	}

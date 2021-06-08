@@ -202,7 +202,7 @@ func (tc *TeamContext) TeamBuilderHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 		curTeam.Pokemons = append(curTeam.Pokemons, pokemonToAdd)
-		err := tc.Database.AddPokemonToTeam(curTeam.TeamID, pokemonToAdd.PokemonID)
+		err := tc.Database.AddPokemonToTeam(curTeam.TeamID, pokemonToAdd.Species)
 		if err != nil {
 			fmt.Printf("failed to add pokemon to current team: %v", err.Error())
 			return
