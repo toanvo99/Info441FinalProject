@@ -10,7 +10,7 @@ create table if not exists User (
 );
 
 /*outer*/
-create table if not exists [Type] (
+create table if not exists `Type` (
     TypeID int auto_increment primary key not null,
     TypeName varchar(128) not null
 );
@@ -20,22 +20,22 @@ create table if not exists Damage (
     DamagetID int not null auto_increment primary key,
     DamageType varchar(25) not null,
     DamageDesc varchar(500) not null
-)
+);
 
 /*outer*/
-create table if not exists [Move] (
+create table if not exists `Move` (
     MoveID int not null auto_increment primary key,
     TypeID int not null,
     DamageID int not null,
     MoveName varchar(25) not null,      
     MoveDesc varchar(500) not null,
-    [Power] int not null
+    `Power` int not null
 );
 
 /*stat*/
-create table if not exists [Stat] (
+create table if not exists `Stat` (
     StatID int not null auto_increment primary key,
-    StatName varchar(25) not null,
+    StatName varchar(25) not null
 );
 
 /*type*/
@@ -98,5 +98,5 @@ create table if not exists PokemonTeam (
     MoveSetID int not null
 );
 
-INSERT INTO [Type] (TypeName) VALUES ('Fire'), ('Water')
+INSERT INTO `Type` (TypeName) VALUES ('Fire'), ('Water');
 
