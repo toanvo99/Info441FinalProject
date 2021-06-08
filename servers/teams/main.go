@@ -21,7 +21,7 @@ func main() {
 	if len(sqlPass) == 0 {
 		log.Fatal("No MYSQL_ROOT_PASSWORD found")
 	}
-	DSN := fmt.Sprintf("root:%s@tcp(database:3306)/mysqldb?parseTime=true", sqlPass)
+	DSN := fmt.Sprintf("root:%s@tcp(database:3306)/finaldb?parseTime=true", sqlPass)
 	db, err := sql.Open("mysql", DSN)
 	if err != nil {
 		fmt.Printf("error opening database: %v\n", err)

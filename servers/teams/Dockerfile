@@ -1,5 +1,5 @@
 FROM alpine
 RUN apk add --no-cache ca-certificates
-COPY messaging /messaging
+COPY teams /teams
 EXPOSE 80
 ENTRYPOINT ["/teams"]

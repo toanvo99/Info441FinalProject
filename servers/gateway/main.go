@@ -9,7 +9,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -19,8 +18,9 @@ import (
 	"Info441FinalProject/servers/gateway/models"
 	"Info441FinalProject/servers/gateway/sessions"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/go-redis/redis"
-	"github.com/mtslzr/pokeapi-go"
 )
 
 // Director is the director used for routing to microservices
@@ -103,7 +103,7 @@ func main() {
 	// This DSN is assuming the name of our docker image is "database"
 	// and that the name of our database is mysqldb.
 	// THIS IS SUBJECT TO CHANGE!!!!!
-	DSN := fmt.Sprintf("root:%s@tcp(database:3306)/mysqldb", sqlPass)
+	DSN := fmt.Sprintf("root:%s@tcp(database:3306)/finaldb", sqlPass)
 
 	db, err := sql.Open("mysql", DSN)
 	if err != nil {
@@ -149,7 +149,7 @@ func fillDB(db *sql.DB) {
 }
 */
 
-func fillDB(db *sql.DB) {
+/* func fillDB(db *sql.DB) {
 	insq := "INSERT into Species (Type1ID, Type2ID, SpeciesName, Sprite) VALUES (?,?,?,?)"
 	for i := 1; i <= 898; i++ {
 		current, errPoke := pokeapi.PokemonSpecies(strconv.Itoa(i))
@@ -161,4 +161,4 @@ func fillDB(db *sql.DB) {
 			fmt.Printf("failed to insert in fill db: %v", err)
 		}
 	}
-}
+} */
