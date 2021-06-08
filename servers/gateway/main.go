@@ -9,6 +9,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -19,6 +20,7 @@ import (
 	"Info441FinalProject/servers/gateway/sessions"
 
 	"github.com/go-redis/redis"
+	"github.com/mtslzr/pokeapi-go"
 )
 
 // Director is the director used for routing to microservices
@@ -130,4 +132,33 @@ func main() {
 
 	log.Printf("server is listening at http://%s", addr)
 	log.Fatal(http.ListenAndServe(addr, mux))
+}
+
+/*
+func fillDB(db *sql.DB) {
+	insq := "Query to insert a single pokemon into a database"
+	// Poke api says you can get with a number corresponding to its
+	// pokedex entry. This should get every pokemon and insert it into the
+	// db.
+	for (int i = 1; i <= total num of pokemon; i++) {
+		current = pokeapi.Pokemon(i)
+		response, err := ss.Database.Exec(insertQuery,
+		current
+		)
+	}
+}
+*/
+
+func fillDB(db *sql.DB) {
+	insq := "INSERT into Species (Type1ID, Type2ID, SpeciesName, Sprite) VALUES (?,?,?,?)"
+	for i := 1; i <= 898; i++ {
+		current, errPoke := pokeapi.PokemonSpecies(strconv.Itoa(i))
+		if errPoke != nil {
+			fmt.Printf("failed to retrieve pokemon from pokeapi: %v", errPoke)
+		}
+		_, err := ss.Database.Exec(insq, 1, 1, current.Species.Name, current.Sprites.FrontDefault)
+		if err != nil {
+			fmt.Printf("failed to insert in fill db: %v", err)
+		}
+	}
 }

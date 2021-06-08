@@ -25,8 +25,9 @@ create table if not exists Damage (
 /*outer*/
 create table if not exists [Move] (
     MoveID int not null auto_increment primary key,
-    TypeID int not null foreign key references [Type](TypeID),
-    DamageID int not null foreign key references Damage(DamageID),
+    TypeID int not null,
+    DamageID int not null,
+    MoveName varchar(25) not null,      
     MoveDesc varchar(500) not null,
     [Power] int not null
 );
@@ -40,21 +41,22 @@ create table if not exists [Stat] (
 /*type*/
 create table if not exists Species (
     SpeciesID int not null auto_increment primary key,
-    Type1ID int not null foreign key references Type(TypeID),
-    Type2ID int null foreign key references Type(TypeID),
-    SpeciesName varchar(128) not null
+    Type1ID int not null,
+    Type2ID int not null,
+    SpeciesName varchar(128) not null,
+    Sprite varchar(1000) not null
 );
 
 /*species*/
 create table if not exists Pokemon (
     PokemonID int not null auto_increment primary key,
-    SpeciesID int foreign references Species(SpeciesID) not null
+    SpeciesID int not null
 );
 
 /*trainer*/
 create table if not exists Team (
     TeamID int not null auto_increment primary key,
-    TrainerID int foreign key references User(TrainerID)
+    TrainerID int 
 );
 
 
@@ -63,8 +65,8 @@ create table if not exists MoveSet (
 );
 
 create table if not exists MoveSetMove (
-    MoveSetID int not null foreign key references MoveSet(MoveSetID),
-    MoveID int not null foreign key references [Move](MoveID)
+    MoveSetID int not null,
+    MoveID int not null 
 );
 
 
@@ -74,27 +76,27 @@ create table if not exists StatSet (
 );
 
 create table if not exists StatSetStat (
-    StatSetID int not null foreign key references StatSet(StatSetID),
-    StatID int not null foreign key references [Stat](StatID),
+    StatSetID int not null,
+    StatID int not null,
     StatValue int not null
 );
 
 
 create table if not exists PokemonStatSet (
-    PokemonID int not null foreign key references Pokemon(PokemonID)
-    MoveSetID int not null foreign key references StatSet(StatSetID)
+    PokemonID int not null,
+    MoveSetID int not null 
 );
 
 
 create table if not exists PokemonMoveSet (
-    PokemonID int not null foreign key references Pokemon(PokemonID)
-    MoveSetID int not null foreign key references MoveSet(StatSetID)
+    PokemonID int not null,
+    MoveSetID int not null 
 );
 
 create table if not exists PokemonTeam (
-    PokemonID int not null foreign key references Pokemon(PokemonID),
-    MoveSetID int not null foreign key references Team(TeamID)
+    PokemonID int not null,
+    MoveSetID int not null
 );
 
-
+INSERT INTO [Type] (TypeName) VALUES ('Fire'), ('Water')
 

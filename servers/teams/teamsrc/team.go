@@ -21,9 +21,10 @@ type Team struct {
 //Pokemon represents the specific Pokemon
 type Pokemon struct {
 	PokemonID int64  `json:"pokemonID"`
-	Species   string `json:species"`
-	Type1     string `json:type1"`
-	Type2     string `json:type2"`
+	Species   string `json:"species"`
+	Type1     string `json:"type1"`
+	Type2     string `json:"type2"`
+	Sprite    string `json:"sprite"`
 }
 
 // user struct as it will be needed by our handlers
@@ -81,7 +82,7 @@ func (tc *TeamContext) AllTeamHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		t := Team{}
 		err := json.NewDecoder(r.Body).Decode(&t)
-		if t.Trainer.UserName == "" {
+		if t.Trainer.Username == "" {
 			http.Error(w, "Trainers doesn't exit", http.StatusBadRequest)
 			return
 		}
@@ -148,13 +149,13 @@ func (tc *TeamContext) TeamManageHandler(w http.ResponseWriter, r *http.Request)
 	// creating a team using JSON from request body
 	/***** use a POST METHOD***/
 	if r.Method == http.MethodPost {
-		dec := json.NewDecoder(r.body)
+		dec := json.NewDecoder(r.Body)
 		newTeam := &Team{}
 		if err := dec.Decode(newTeam); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		newTeam, err := tc.Database.MakeNewTeam(u.TrainerID)
+		newTeam, err := tc.TeamStore.MakeNewTeam(u.TrainerID)
 		if err != nil {
 			fmt.Printf("error inserting channel: %v\n", err)
 		}
@@ -188,21 +189,21 @@ func (tc *TeamContext) TeamBuilderHandler(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	curTeam, err = tc.TeamStore.TeamGetByID(teamid)
+	curTeam, err := tc.TeamStore.TeamGetByID(teamid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	// POST: Add pokemon to the current team
 	if r.Method == http.MethodPost {
-		dec := json.NewDecoder(r.body)
+		dec := json.NewDecoder(r.Body)
 		pokemonToAdd := &Pokemon{}
 		if err := dec.Decode(pokemonToAdd); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		curTeam.Pokemons = append(curTeam.Pokemons, pokemonToAdd)
-		err := tc.Database.AddPokemonToTeam(curTeam.TeamID, pokemonToAdd.Species)
+		err := tc.TeamStore.AddPokemonToTeam(curTeam.TeamID, pokemonToAdd.Species)
 		if err != nil {
 			fmt.Printf("failed to add pokemon to current team: %v", err.Error())
 			return
@@ -213,12 +214,13 @@ func (tc *TeamContext) TeamBuilderHandler(w http.ResponseWriter, r *http.Request
 	}
 	// DELETE: Remove pokemon given by the request body from the current team
 	if r.Method == http.MethodDelete {
+		dec := json.NewDecoder(r.Body)
 		pokemonToDel := &Pokemon{}
 		if err := dec.Decode(pokemonToDel); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		_, err := tc.Database.DeletePokemonFromTeam(curTeam.TeamID, pokemonToDel.PokemonID)
+		_, err := tc.TeamStore.DeletePokemonFromTeam(curTeam.TeamID, pokemonToDel.PokemonID)
 		if err != nil {
 			fmt.Printf("failed to delete pokemon from current team: %v", err.Error())
 			return
