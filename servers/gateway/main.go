@@ -130,8 +130,9 @@ func main() {
 	mux.Handle("/v1/teams", teamsProxy)
 	mux.Handle("/v1/teams/", teamsProxy)
 
-	log.Printf("server is listening at http://%s", addr)
-	log.Fatal(http.ListenAndServe(addr, mux))
+	wrappedMux := handlers.NewCors(mux)
+	log.Printf("server is listening at %s", addr)
+	log.Fatal(http.ListenAndServeTLS(addr, tlsCertPath, tlsKeyPath, wrappedMux))
 }
 
 /*
