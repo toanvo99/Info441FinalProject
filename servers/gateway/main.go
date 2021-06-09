@@ -103,7 +103,7 @@ func main() {
 	// This DSN is assuming the name of our docker image is "database"
 	// and that the name of our database is mysqldb.
 	// THIS IS SUBJECT TO CHANGE!!!!!
-	DSN := fmt.Sprintf("root:%s@tcp(database:3306)/finaldb", sqlPass)
+	DSN := fmt.Sprintf("root:%s@tcp(finaldb:3306)/finaldb", sqlPass)
 
 	db, err := sql.Open("mysql", DSN)
 	if err != nil {
@@ -126,6 +126,10 @@ func main() {
 	messagesURLs := getURLs(TEAMSSADDR)
 	teamsProxy := &httputil.ReverseProxy{Director: CustomDirector(messagesURLs, handlerContext)}
 
+	mux.HandleFunc("/v1/users", handlerContext.TrainersHandler)
+	mux.HandleFunc("/v1/users/", handlerContext.SpecificUserHandler)
+	mux.HandleFunc("/v1/sessions", handlerContext.SessionsHandler)
+	mux.HandleFunc("/v1/sessions/", handlerContext.SpecificSessionHandler)
 	mux.Handle("/v1/", teamsProxy)
 	mux.Handle("/v1/teams", teamsProxy)
 	mux.Handle("/v1/teams/", teamsProxy)
@@ -134,32 +138,3 @@ func main() {
 	log.Printf("server is listening at %s", addr)
 	log.Fatal(http.ListenAndServeTLS(addr, tlsCertPath, tlsKeyPath, wrappedMux))
 }
-
-/*
-func fillDB(db *sql.DB) {
-	insq := "Query to insert a single pokemon into a database"
-	// Poke api says you can get with a number corresponding to its
-	// pokedex entry. This should get every pokemon and insert it into the
-	// db.
-	for (int i = 1; i <= total num of pokemon; i++) {
-		current = pokeapi.Pokemon(i)
-		response, err := ss.Database.Exec(insertQuery,
-		current
-		)
-	}
-}
-*/
-
-/* func fillDB(db *sql.DB) {
-	insq := "INSERT into Species (Type1ID, Type2ID, SpeciesName, Sprite) VALUES (?,?,?,?)"
-	for i := 1; i <= 898; i++ {
-		current, errPoke := pokeapi.PokemonSpecies(strconv.Itoa(i))
-		if errPoke != nil {
-			fmt.Printf("failed to retrieve pokemon from pokeapi: %v", errPoke)
-		}
-		_, err := ss.Database.Exec(insq, 1, 1, current.Species.Name, current.Sprites.FrontDefault)
-		if err != nil {
-			fmt.Printf("failed to insert in fill db: %v", err)
-		}
-	}
-} */
